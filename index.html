@@ -4,42 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SIGN UP</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    .password-wrapper {
-      position: relative;
-    }
-
-    .password-wrapper input {
-      width: 100%;
-      padding-right: 40px; /* space for eye button */
-    }
-
-    .password-wrapper button {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 18px;
-    }
-
-    #passwordError {
-      color: red;
-      margin-top: 5px;
-      font-size: 14px;
-      display: none;
-    }
-
-    /* Add this new style for hiding elements */
-    .signup-only {
-      display: block; /* Visible by default */
-    }
-  </style>
-</head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="style.css"> </head>
 <body>
+  <div id="blurred-background-layer"></div>
   <div id="userInfo" style="display: none;">
     <h3>Welcome, <span id="userName"></span>!</h3>
     <p>Email: <span id="userEmail"></span></p>
@@ -50,36 +18,32 @@
   <div id="authBox">
     <h2 id="formTitle">Sign Up</h2>
     <form id="authForm">
-      <!-- Full Name -->
-      <div class="form-group signup-only">
+      <div class="form-group">
         <input type="text" id="name" placeholder="Full Name" required />
       </div>
-
-      <!-- Email -->
+      
       <div class="form-group">
         <input type="email" id="email" placeholder="Email" required />
       </div>
-
-      <!-- Mobile Number -->
-      <div class="form-group signup-only">
-        <input type="tel" id="mobile" placeholder="Mobile Number" required />
+      
+      <div class="form-group">
+        <input type="tel" id="mobile" placeholder="Mobile Number" 
+               pattern="[0-9]{10}" maxlength="10" required />
+        <div id="mobileError">Please enter a valid 10-digit mobile number</div>
       </div>
-
-      <!-- Password -->
+      
       <div class="form-group password-wrapper">
         <input type="password" id="password" placeholder="Password" required />
-        <button type="button" id="togglePassword">👁️</button>
+        <button type="button" class="toggle-password">👁️</button>
       </div>
-
-      <!-- Confirm Password (Sign Up only) -->
-      <div class="form-group password-wrapper signup-only">
+      
+      <div class="form-group password-wrapper">
         <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
-        <button type="button" id="toggleConfirmPassword">👁️</button>
+        <button type="button" class="toggle-password">👁️</button>
       </div>
-
-      <!-- Error Message -->
-      <div id="passwordError" class="signup-only">PASSWORD & CONFIRM PASSWORD ARE NOT SAME</div>
-
+      
+      <div id="passwordError">PASSWORD & CONFIRM PASSWORD DO NOT MATCH</div>
+      
       <button type="submit" id="submitBtn">Sign Up</button>
     </form>
 
@@ -88,67 +52,59 @@
     </p>
 
     <hr />
-    <button id="googleBtn">Continue with Google</button>
+    <button id="googleBtn">
+      <span class="google-icon"></span>
+      Continue with Google
+    </button>
   </div>
 
-  <!-- Firebase -->
-  <script type="module" src="app.js"></script>
-
-  <!-- Eye Toggle + Match Check -->
   <script>
-    // Toggle password
-    document.getElementById('togglePassword').addEventListener('click', function () {
-      const pass = document.getElementById('password');
-      pass.type = pass.type === 'password' ? 'text' : 'password';
-      this.textContent = pass.type === 'password' ? '👁️' : '🙈';
+    // Password Toggle
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const input = this.parentElement.querySelector('input');
+        input.type = input.type === 'password' ? 'text' : 'password';
+        this.textContent = input.type === 'password' ? '👁️' : '🙈';
+      });
     });
-
-    // Toggle confirm password
-    document.getElementById('toggleConfirmPassword').addEventListener('click', function () {
-      const pass = document.getElementById('confirmPassword');
-      pass.type = pass.type === 'password' ? 'text' : 'password';
-      this.textContent = pass.type === 'password' ? '👁️' : '🙈';
+    
+    // Mobile Number Validation
+    document.getElementById('mobile').addEventListener('input', function() {
+      const mobile = this.value;
+      const error = document.getElementById('mobileError');
+      
+      if (mobile.length > 10) {
+        this.value = mobile.slice(0, 10);
+      }
+      
+      error.style.display = /^\d{10}$/.test(mobile) ? 'none' : 'block';
     });
-
-    // Password match validation (only for signup)
-    document.getElementById('authForm').addEventListener('submit', function (e) {
-      const isLogin = document.getElementById('formTitle').textContent === 'Login';
-      if (!isLogin) {
-        const password = document.getElementById('password').value;
-        const confirm = document.getElementById('confirmPassword').value;
-        const error = document.getElementById('passwordError');
-
-        if (password !== confirm) {
-          e.preventDefault();
-          error.style.display = "block";
-        } else {
-          error.style.display = "none";
-        }
+    
+    // Form Validation
+    document.getElementById('authForm').addEventListener('submit', function(e) {
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirmPassword').value;
+      const error = document.getElementById('passwordError');
+      
+      if (password !== confirm) {
+        e.preventDefault();
+        error.style.display = "block";
+      } else {
+        error.style.display = "none";
       }
     });
 
-    // Toggle between login/signup views
-    document.getElementById('toggleMode').addEventListener('click', function(e) {
-      e.preventDefault();
-      const isLogin = document.getElementById('formTitle').textContent === 'Login';
-      
-      // Toggle title and button text
-      document.getElementById('formTitle').textContent = isLogin ? 'Sign Up' : 'Login';
-      document.getElementById('submitBtn').textContent = isLogin ? 'Sign Up' : 'Login';
-      
-      // Toggle the link text
-      document.getElementById('toggleText').innerHTML = isLogin 
-        ? 'Already registered? <a href="#" id="toggleMode">Login here</a>' 
-        : 'New user? <a href="#" id="toggleMode">Sign up here</a>';
-      
-      // Toggle visibility of signup-only fields
-      document.querySelectorAll('.signup-only').forEach(el => {
-        el.style.display = isLogin ? 'block' : 'none';
-      });
-      
-      // Re-attach event listener to the new toggle link
-      document.getElementById('toggleMode').addEventListener('click', arguments.callee);
+    // Add hover effect for the login link
+    document.getElementById('toggleMode').addEventListener('mouseover', function() {
+      this.style.color = '#8b5cf6';
+      this.style.textDecoration = 'underline';
+    });
+    document.getElementById('toggleMode').addEventListener('mouseout', function() {
+      this.style.color = '#a78bfa';
+      this.style.textDecoration = 'none';
     });
   </script>
+  
+  <script type="module" src="app.js"></script>
 </body>
 </html>
