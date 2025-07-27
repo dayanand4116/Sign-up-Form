@@ -161,6 +161,7 @@ function init() {
       dom.userInfo.style.display = "none";
       dom.authBox.style.display = "block";
     }
+    
   });
 }
 
