@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SIGN UP</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css"> </head>
+  <link rel="stylesheet" href="style.css"> 
+</head>
 <body>
   <div id="blurred-background-layer"></div>
   <div id="userInfo" style="display: none;">
@@ -18,18 +19,13 @@
   <div id="authBox">
     <h2 id="formTitle">Sign Up</h2>
     <form id="authForm">
-      <div class="form-group">
+      <div class="form-group signup-only">
         <input type="text" id="name" placeholder="Full Name" required />
       </div>
       
       <div class="form-group">
-        <input type="email" id="email" placeholder="Email" required />
-      </div>
-      
-      <div class="form-group">
-        <input type="tel" id="mobile" placeholder="Mobile Number" 
-               pattern="[0-9]{10}" maxlength="10" required />
-        <div id="mobileError">Please enter a valid 10-digit mobile number</div>
+        <input type="text" id="emailOrMobile" placeholder="Email or Mobile Number" required />
+        <div id="mobileError" style="display:none;"></div>
       </div>
       
       <div class="form-group password-wrapper">
@@ -37,7 +33,7 @@
         <button type="button" class="toggle-password">👁️</button>
       </div>
       
-      <div class="form-group password-wrapper">
+      <div class="form-group password-wrapper signup-only">
         <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
         <button type="button" class="toggle-password">👁️</button>
       </div>
@@ -68,18 +64,18 @@
       });
     });
     
-    // Mobile Number Validation
-    document.getElementById('mobile').addEventListener('input', function() {
-      const mobile = this.value;
-      const error = document.getElementById('mobileError');
-      
-      if (mobile.length > 10) {
-        this.value = mobile.slice(0, 10);
-      }
-      
-      error.style.display = /^\d{10}$/.test(mobile) ? 'none' : 'block';
+    // Mobile Number Validation is now handled in app.js for a single field
+    document.getElementById('emailOrMobile').addEventListener('input', function() {
+        const input = this.value;
+        const mobileError = document.getElementById('mobileError');
+        // Regular expression to check if the input is a valid 10-digit number
+        if (!/^\d{10}$/.test(input) && input.length > 0) {
+            mobileError.style.display = 'block';
+        } else {
+            mobileError.style.display = 'none';
+        }
     });
-    
+
     // Form Validation
     document.getElementById('authForm').addEventListener('submit', function(e) {
       const password = document.getElementById('password').value;
