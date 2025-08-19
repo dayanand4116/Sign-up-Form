@@ -41,7 +41,7 @@ const dom = {
   toggleText: document.getElementById("toggleText"),
   toggleMode: document.getElementById("toggleMode"),
   nameField: document.getElementById("name"),
-  mobileField: document.getElementById("mobile"),
+  emailOrMobileField: document.getElementById("emailOrMobile"),
   passwordField: document.getElementById("password"),
   confirmField: document.getElementById("confirmPassword"),
   passwordError: document.getElementById("passwordError"),
@@ -60,6 +60,15 @@ function toggleForm() {
   // Update UI
   dom.formTitle.textContent = isLogin ? "Login" : "Sign Up";
   dom.submitBtn.textContent = isLogin ? "Login" : "Sign Up";
+  dom.toggleText.innerHTML = isLogin 
+    ? "Don't have an account? <a href='#' id='toggleMode'>Sign up here</a>"
+    : "Already registered? <a href='#' id='toggleMode'>Login here</a>";
+  
+  // Re-attach event listener to the new toggleMode link
+  document.getElementById('toggleMode').addEventListener('click', (e) => {
+    e.preventDefault();
+    toggleForm();
+  });
   
   // Toggle fields
   document.querySelectorAll('.signup-only').forEach(el => {
@@ -81,15 +90,24 @@ async function handleAuth(e) {
   const originalBtnText = dom.submitBtn.textContent;
   dom.submitBtn.textContent = "Processing...";
   
-  const email = document.getElementById("email").value.trim();
+  const emailOrMobile = dom.emailOrMobileField.value.trim();
   const password = dom.passwordField.value.trim();
 
   try {
     if (isLogin) {
-      await signInWithEmailAndPassword(auth, email, password);
+        // Simple check to see if input is an email address
+        if (emailOrMobile.includes('@')) {
+            await signInWithEmailAndPassword(auth, emailOrMobile, password);
+        } else {
+            // For a mobile number, you'd need a different authentication method, like phone auth
+            alert("For mobile number login, please use a valid email or a different authentication method.");
+            dom.submitBtn.disabled = false;
+            dom.submitBtn.textContent = originalBtnText;
+            return;
+        }
     } else {
       const name = dom.nameField.value.trim();
-      const mobile = dom.mobileField.value.trim();
+      const mobile = ""; // Mobile number is not directly collected in this new combined field
       const confirm = dom.confirmField.value.trim();
       
       if (password !== confirm) {
@@ -97,8 +115,8 @@ async function handleAuth(e) {
         throw new Error("Passwords don't match");
       }
       
-      const userCred = await createUserWithEmailAndPassword(auth, email, password);
-      await setDoc(doc(db, "users", userCred.user.uid), { name, email, mobile });
+      const userCred = await createUserWithEmailAndPassword(auth, emailOrMobile, password);
+      await setDoc(doc(db, "users", userCred.user.uid), { name, email: emailOrMobile, mobile });
       toggleForm();
     }
   } catch (err) {
@@ -161,7 +179,6 @@ function init() {
       dom.userInfo.style.display = "none";
       dom.authBox.style.display = "block";
     }
-    
   });
 }
 
